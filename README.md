@@ -1,55 +1,37 @@
 # Book Market Analysis
 
-An end-to-end Data Analyst portfolio project analyzing book prices, ratings, and categories from an e-commerce website.
+A small end-to-end data analysis project that scrapes book information from Books to Scrape, cleans it, stores it in SQLite, runs SQL queries, and exports the results for further analysis.
 
-The project demonstrates a complete data analytics workflow:
+This project follows the full workflow:
 
-**Web Scraping → Data Cleaning → SQLite → SQL Analysis → Excel Dashboard → Business Insights**
-
----
-
-## Project Overview
-
-This project analyzes book listings collected from Books to Scrape.
-
-The goal is to understand:
-
-- Book price distribution
-- Category distribution
-- Average price by category
-- Average rating by category
-- Relationship between price and rating
-- High-priced books with low ratings
-- Highest- and lowest-priced books
-
-The final results are presented through an Excel dashboard.
+Web Scraping → Data Cleaning → SQLite → SQL Analysis → Excel Export
 
 ---
 
-## Dataset
+## Overview
 
-The dataset contains **920 book listings** collected from the website.
+The project gathers book listings from a public sample e-commerce site and analyzes:
 
-The raw dataset includes:
+- price distribution
+- category distribution
+- average price by category
+- average rating by category
+- high-price and low-rating combinations
+- top and bottom-priced books
 
-- Book title
-- Price
-- Rating
-- Availability
-- Product URL
-- Category
-- Scraped date
+The core objective is to turn raw scraped data into a structured dataset and answer business-oriented questions with SQL.
 
-After cleaning, the dataset contains:
+---
 
-- Book title
-- Price
-- Rating
-- Product URL
-- Category
-- Scraped date
+## Tech Stack
 
-The availability field was removed during cleaning because all collected records had the same availability value and did not provide useful analytical information.
+- Python
+- pandas
+- requests
+- BeautifulSoup4
+- SQLite
+- openpyxl
+- SQL
 
 ---
 
@@ -57,197 +39,193 @@ The availability field was removed during cleaning because all collected records
 
 ```text
 book-market-analysis/
-│
-├── data/
-│   ├── raw/
-│   │   └── books_raw.csv
-│   ├── processed/
-│   │   └── books_clean.csv
-│   └── books.db
-│
-├── scraper/
-│   └── scraper.py
-│
 ├── analysis/
 │   └── clean_data.py
-│
+├── dashboard/
+├── data/
+│   ├── processed/
+│   │   └── books_clean.csv
+│   └── raw/
+│       └── books_raw.csv
+├── scraper/
+│   └── scraper.py
 ├── sql/
 │   ├── analysis.sql
 │   ├── database.py
 │   └── run_queries.py
-│
-├── dashboard/
-│   └── SQL Results.xlsx
-│
-├── requirements.txt
+├── .gitignore
 ├── README.md
-└── .gitignore
+├── requirements.txt
+└──
+```
 
-🔄 Data Pipeline
-1. Web Scraping
+---
 
-Python is used to collect book information from Books to Scrape.
+## Data Pipeline
 
-The scraper collects:
+### 1. Web Scraping
 
-Book title
-Price
-Rating
-Availability
-Product URL
-Category
-Scraped date
+The scraper in [scraper/scraper.py](scraper/scraper.py) crawls the Books to Scrape website and collects:
 
-The raw dataset is saved to:
+- title
+- price
+- rating
+- availability
+- category
+- product URL
+- scraped date
 
-data/raw/books_raw.csv
+Raw data is saved to:
 
-The scraper also visits individual product pages to retrieve category information.
+- [data/raw/books_raw.csv](data/raw/books_raw.csv)
 
-2. Data Cleaning
+### 2. Data Cleaning
 
-The raw dataset is cleaned using Pandas.
+The cleaning script in [analysis/clean_data.py](analysis/clean_data.py) standardizes the data by:
 
-Cleaning steps include:
+- removing currency symbols from prices
+- converting price values to numeric values
+- mapping rating text to numeric values
+- filling missing categories as Unknown
+- converting scraped dates to datetime format
+- removing duplicate product URLs
+- dropping the availability column if it has no analytical value
+- filling missing numeric values safely
 
-Removing currency symbols from prices
-Converting prices to numeric values
-Converting rating words into numerical ratings
-Handling missing categories
-Replacing unreliable category values with Unknown
-Converting the scraped date into a date format
-Removing duplicate product URLs
-Removing the availability field because it contained no useful variation
-Handling unexpected missing numeric values
+Cleaned data is saved to:
 
-The cleaned dataset is saved to:
+- [data/processed/books_clean.csv](data/processed/books_clean.csv)
 
-data/processed/books_clean.csv
-3. SQLite Database
+### 3. SQLite Database
 
-The cleaned dataset is loaded into a SQLite database.
+The script in [sql/database.py](sql/database.py) loads the cleaned CSV into a SQLite database and creates the `books` table.
 
-Database:
+Database output:
 
-data/books.db
+- [data/books.db](data/books.db)
 
-Table:
+### 4. SQL Analysis
 
-books
+The SQL queries in [sql/analysis.sql](sql/analysis.sql) answer questions such as:
 
-SQLite provides the structured data source for the SQL analysis.
+- total books and market summary
+- books per category
+- average price by category
+- average rating by category
+- most expensive and cheapest books
+- high-price / low-rating books
+- price distribution by rating
+- categories with more than 20 books
 
-4. SQL Analysis
+### 5. Excel Export
 
-SQL queries are used to answer business-oriented questions about the dataset.
+The script in [sql/run_queries.py](sql/run_queries.py) runs all queries, saves the results to a SQLite database, and exports them to Excel as multiple sheets.
 
-The analysis includes:
+Output:
 
-Overall market statistics
-Book count by category
-Average price by category
-Average rating by category
-Highest-priced books
-Lowest-priced books
-Expensive books with low ratings
-Average price by rating
-Categories containing more than 20 books
-Highest-rated books with the highest prices
+- [dashboard/SQL Results.xlsx](dashboard/SQL Results.xlsx)
 
-The SQL queries are stored in:
+---
 
-sql/analysis.sql
+## Setup
 
-The query results are also exported automatically to Excel using:
+1. Clone the repository
 
-sql/run_queries.py
-📈 Key Findings
-Overall Market
-920 books were analyzed.
-Average listed price: £34.97
-Minimum listed price: £10.00
-Maximum listed price: £59.99
-Average rating: 2.92 / 5
-Category Distribution
+```bash
+git clone <repository-url>
+cd book-market-analysis
+```
 
-Nonfiction is the largest identified category with 108 books.
+2. Create and activate a virtual environment (optional but recommended)
 
-There are also 210 books classified as Unknown, primarily because category information was unavailable or unreliable for those records.
+```bash
+python -m venv .venv
+```
 
-Average Price by Category
+On Windows:
 
-Among categories with at least 10 books:
+```bash
+.venv\Scripts\activate
+```
 
-Travel has the highest average listed price at £41.17.
-Thriller has an average listed price of £31.43.
-Ratings and Price
+On macOS/Linux:
 
-Average listed price varies only modestly across rating groups:
+```bash
+source .venv/bin/activate
+```
 
-Rating	Average Price
-1 Star	£34.50
-2 Stars	£34.55
-3 Stars	£34.73
-4 Stars	£35.88
-5 Stars	£35.36
+3. Install dependencies
 
-The dataset therefore does not show a large difference in average listed price across rating groups.
-
-High-Price, Low-Rating Books
-
-The dataset contains books priced at £50 or more with ratings of 1–2 stars.
-
-This indicates that higher listed prices do not necessarily correspond to higher ratings within this dataset.
-
-📊 Excel Dashboard
-
-The final Excel dashboard presents:
-
-Total number of books
-Average price
-Average rating
-Maximum price
-Books by category
-Average price by category
-Average rating by category
-Average price by rating
-Key business insights
-
-The dashboard and SQL results are available in:
-
-dashboard/SQL Results.xlsx
-▶️ How to Run the Project
-1. Clone the Repository
-git clone https://github.com/vijay-karthi/Book-market-analysis.git
-cd Book-market-analysis
-2. Install Dependencies
+```bash
 pip install -r requirements.txt
-3. Run the Scraper
+```
+
+---
+
+## Run the Project
+
+### Step 1: Scrape the data
+
+```bash
 python scraper/scraper.py
+```
 
-This creates:
+This creates the raw dataset in [data/raw/books_raw.csv](data/raw/books_raw.csv).
 
-data/raw/books_raw.csv
-4. Clean the Data
+### Step 2: Clean the data
+
+```bash
 python analysis/clean_data.py
+```
 
-This creates:
+This creates the processed dataset in [data/processed/books_clean.csv](data/processed/books_clean.csv).
 
-data/processed/books_clean.csv
-5. Create the SQLite Database
+### Step 3: Create the SQLite database
+
+```bash
 python sql/database.py
+```
 
-This creates:
+This creates the database file in [data/books.db](data/books.db).
 
-data/books.db
-6. Run SQL Analysis
+### Step 4: Run SQL analysis and export to Excel
+
+```bash
 python sql/run_queries.py
+```
 
-This executes the SQL analysis and exports the results to:
+This creates the Excel workbook in [dashboard/SQL Results.xlsx](dashboard/SQL Results.xlsx).
 
-dashboard/SQL Results.xlsx
-💡 Business Insights
-Category Concentration
+---
+
+## Requirements
+
+The project dependencies are listed in [requirements.txt](requirements.txt):
+
+- requests
+- beautifulsoup4
+- pandas
+- matplotlib
+- openpyxl
+
+---
+
+## Notes
+
+- The project is designed as a portfolio-style data analytics workflow.
+- The dataset is sourced from a sample bookstore site used for educational scraping practice.
+- If the database or Excel output is missing, rerun the earlier steps in order.
+
+---
+
+## Future Improvements
+
+Possible extensions for this project include:
+
+- building a more polished dashboard in Power BI or Excel
+- adding more analysis questions and KPIs
+- adding automated validation checks for scraped data
+- publishing the project as a reproducible notebook or pipeline
 
 Nonfiction is the largest identified category with 108 books, while 210 books are classified as Unknown.
 
